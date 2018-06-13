@@ -1,0 +1,35 @@
+{
+  "name": "elm-gallery",
+  "version": "1.0.0",
+  "description": "Display gallery of images stored in Github",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run copy-assets && elm-make src/Main.elm --yes --output=build/app.js",
+    "copy-assets": "rimraf build && mkdir build && cp -r public/* build",
+    "debug": "elm-live src/Main.elm --warn --port=3000 --dir=public/ --output=public/app.js --debug",
+    "deploy": "npm run build && npm run optimize && gh-pages --dist build/",
+    "install": "elm package install -y",
+    "start": "elm-live src/Main.elm --warn --port=3000 --dir=public/ --output=public/app.js",
+    "optimize": "uglifyjs build/app.js -c -m -o build/app.js",
+    "test": "elm-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Natim/elm-gallery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Natim/elm-gallery/issues"
+  },
+  "homepage": "https://github.com/Natim/elm-gallery#readme",
+  "author": "Rémy Hubscher",
+  "license": "MIT",
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-format": "^0.6.1-alpha",
+    "elm-live": "^2.7.5",
+    "elm-test": "^0.18.12",
+    "gh-pages": "^1.2.0",
+    "rimraf": "^2.6.2",
+    "uglify-js": "^3.4.0"
+  }
+}
