@@ -4,6 +4,12 @@ A quick Elm prototype that consume the [Networks Monitoring backend](https://git
 
 ## Getting started
 
+### Create a Github API token
+
+Here: https://github.com/settings/tokens
+
+Make sure to not commit it on Github or it will automatically be rejected.
+
 
 ### Install
 
