@@ -182,7 +182,7 @@ viewImage images image =
 viewGallery : Dict String ImageContent -> Gallery -> Html Msg
 viewGallery images gallery =
     Html.li [ class "col-md-3" ]
-        [ Html.a [ href "#", title gallery.name, onClick <| Display gallery ]
+        [ Html.a [ href "#portfolio", title gallery.name, onClick <| Display gallery ]
             [ List.head gallery.images
                 |> Maybe.withDefault (Image "" "")
                 |> viewImage images
