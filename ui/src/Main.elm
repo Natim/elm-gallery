@@ -3,7 +3,8 @@ module Main exposing (..)
 import Dict exposing (Dict)
 import Html exposing (Html, program)
 import Http
-import Html.Attributes exposing (src, alt, width)
+import Html.Attributes exposing (src, alt, style, title, class, href)
+import Html.Events exposing (onClick)
 import Json.Decode
     exposing
         ( Decoder
@@ -38,9 +39,15 @@ uri =
     "https://api.github.com/repos/Natim/elm-gallery/git/trees/master?recursive=1"
 
 
+token : String
+token =
+    "token <your-token-here>"
+
+
 type Msg
     = UpdateInfo (Result Http.Error Info)
     | DownloadFile String (Result Http.Error ImageContent)
+    | Display Gallery
 
 
 type alias Image =
@@ -58,6 +65,7 @@ type alias Gallery =
 type alias Model =
     { galleries : List Gallery
     , images : List ( String, ImageContent )
+    , gallery : Maybe Gallery
     }
 
 
@@ -86,7 +94,7 @@ getInfo =
             { method = "GET"
             , headers =
                 [ Http.header "Accept" "application/vnd.github.v3+json"
-                , Http.header "Authorization" "token a0d283f53ef364f6795cadd3c84cf38f64964af8"
+                , Http.header "Authorization" token
                 ]
             , url = uri
             , body = Http.emptyBody
@@ -127,7 +135,7 @@ getImageContent imageUrl =
             { method = "GET"
             , headers =
                 [ Http.header "Accept" "application/vnd.github.v3+json"
-                , Http.header "Authorization" "token a0d283f53ef364f6795cadd3c84cf38f64964af8"
+                , Http.header "Authorization" token
                 ]
             , url = imageUrl
             , body = Http.emptyBody
@@ -148,6 +156,7 @@ init : ( Model, Cmd Msg )
 init =
     { galleries = []
     , images = []
+    , gallery = Nothing
     }
         ! [ getInfo ]
 
@@ -160,36 +169,39 @@ viewImage images image =
     in
         case imageContent of
             Just imageContent ->
-                Html.li []
-                    [ Html.img
-                        [ src <| "data:image/jpg;" ++ imageContent.encoding ++ "," ++ imageContent.content
-                        , width 450
-                        , alt image.name
-                        ]
-                        []
+                Html.img
+                    [ src <| "data:image/jpg;" ++ imageContent.encoding ++ "," ++ imageContent.content
+                    , alt image.name
                     ]
+                    []
 
             Nothing ->
-                Html.li [] [ Html.text <| "Loading " ++ image.url ]
+                Html.text <| "Loading " ++ image.url
 
 
 viewGallery : Dict String ImageContent -> Gallery -> Html Msg
 viewGallery images gallery =
-    Html.div []
-        [ Html.h2 [] [ Html.text gallery.name ]
-        , List.map (viewImage images) gallery.images
-            |> Html.ul []
+    Html.li [ class "col-md-3" ]
+        [ Html.a [ href "#", title gallery.name, onClick <| Display gallery ]
+            [ List.head gallery.images
+                |> Maybe.withDefault (Image "" "")
+                |> viewImage images
+            ]
         ]
 
 
 view : Model -> Html Msg
 view model =
-    let
-        imageDict =
-            Debug.log "Content" <| Dict.fromList model.images
-    in
-        List.map (viewGallery imageDict) model.galleries
-            |> Html.div []
+    Html.div [ class "gallery" ]
+        [ case model.gallery of
+            Nothing ->
+                List.map (viewGallery <| Dict.fromList model.images) model.galleries
+                    |> Html.ul []
+
+            Just gallery ->
+                List.map (\image -> Html.li [ class "col-md-3" ] [ viewImage (Dict.fromList model.images) image ]) gallery.images
+                    |> Html.ul []
+        ]
 
 
 isImage : File -> Bool
@@ -251,6 +263,9 @@ update msg model =
                     Debug.log ("DownloadFile error " ++ url) err
             in
                 ( model, Cmd.none )
+
+        Display gallery ->
+            ( { model | gallery = Just gallery }, Cmd.none )
 
 
 main : Program Never Model Msg
