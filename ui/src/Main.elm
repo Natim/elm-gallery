@@ -41,7 +41,7 @@ uri =
 
 token : String
 token =
-    "token <your-token-here>"
+    "token cd0038093eaaf45d0895bf0a21aeaa7d9126ff77"
 
 
 type Msg
